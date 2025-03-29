@@ -114,7 +114,6 @@ async function clearAllTimers(userId, chatId) {
   for (const timer of timers) {
     clearTimeout(timer.timeoutId); // Clear the scheduled timeout
     await deleteTimer(userId, timer.keyword);
-    bot.sendMessage(chatId, `@${timer.username}, '${timer.keyword}' 计时已停止。`);
   }
 }
 
