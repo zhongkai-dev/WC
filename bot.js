@@ -8,7 +8,7 @@ app.get("/", (req, res) => res.send("Bot is running..."));
 app.listen(4251, () => console.log("Server is running on port 4251."));
 
 // Replace with your actual bot token
-const BOT_TOKEN = "7908570741:AAEZ_TxYzTzNPEKv0Vyia5zkBK5GfuoXWRc";
+const BOT_TOKEN = "8090168299:AAGPaJERlTH5L31pm5HnZjttvqQ787F-3JQ";
 
 // Initialize SQLite database
 const db = new sqlite3.Database("./timers.db", (err) => {
