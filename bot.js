@@ -81,21 +81,22 @@ bot.on("message", async (msg) => {
 
   // Stop timers if user sends "1"
   if (messageText.includes("1")) {
-    await clearTimer(userId, "wc", chatId);
-    await clearTimer(userId, "cy", chatId);
+    await clearAllTimers(userId, chatId);
   }
 });
 
 // Function to handle keywords ('wc' or 'cy')
 async function handleKeyword(userId, username, keyword, chatId, messageId) {
-  const existingTimer = await getTimer(userId, keyword);
-  if (!existingTimer) {
-    const startTime = Date.now();
-    const delay = keyword === "wc" ? 900000 : 600000; // 15 mins for wc, 10 mins for cy
-    const timeoutId = setTimeout(() => warnAfterTime(userId, keyword, chatId, messageId), delay);
+  const delay = keyword === "wc" ? 900000 : 600000; // 15 mins for wc, 10 mins for cy
 
-    await saveTimer(userId, username, keyword, messageId, startTime, timeoutId);
-  }
+  // Clear any existing timer for this keyword
+  await clearTimer(userId, keyword, chatId);
+
+  // Start a new timer
+  const startTime = Date.now();
+  const timeoutId = setTimeout(() => warnAfterTime(userId, keyword, chatId, messageId), delay);
+
+  await saveTimer(userId, username, keyword, messageId, startTime, timeoutId);
 }
 
 // Function to warn after a certain delay
@@ -109,13 +110,23 @@ async function warnAfterTime(userId, keyword, chatId, messageId) {
   }
 }
 
-// Function to clear a timer
+// Function to clear a specific timer
 async function clearTimer(userId, keyword, chatId) {
   const timer = await getTimer(userId, keyword);
   if (timer) {
     clearTimeout(timer.timeoutId); // Clear the scheduled timeout
     await deleteTimer(userId, keyword);
     bot.sendMessage(chatId, `@${timer.username}, '${keyword}' 计时已停止。`);
+  }
+}
+
+// Function to clear all timers for a user
+async function clearAllTimers(userId, chatId) {
+  const timers = await getAllTimers(userId);
+  for (const timer of timers) {
+    clearTimeout(timer.timeoutId); // Clear the scheduled timeout
+    await deleteTimer(userId, timer.keyword);
+    bot.sendMessage(chatId, `@${timer.username}, '${timer.keyword}' 计时已停止。`);
   }
 }
 
@@ -130,6 +141,22 @@ function getTimer(userId, keyword) {
           reject(err);
         } else {
           resolve(row);
+        }
+      }
+    );
+  });
+}
+
+function getAllTimers(userId) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      "SELECT * FROM timers WHERE userId = ?",
+      [userId],
+      (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
         }
       }
     );
