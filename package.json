@@ -1,7 +1,8 @@
 {
-  "name": "your-bot",
+  "name": "telegram-bot",
   "version": "1.0.0",
-  "main": "bot.js", // Ensure this points to your main bot file
+  "description": "A Telegram bot with SQLite integration",
+  "main": "bot.js",
   "scripts": {
     "start": "node bot.js"
   },
