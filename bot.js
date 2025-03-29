@@ -37,7 +37,7 @@ const bot = new TelegramBot(BOT_TOKEN, {
 // Define keyboard with buttons for 'wc' and 'cy'
 const keyboard = {
   reply_markup: {
-    keyboard: [["/wc"], ["/cy"]],
+    keyboard: [["wc"], ["cy"]],
     resize_keyboard: true,
     one_time_keyboard: false,
   },
@@ -53,31 +53,19 @@ bot.onText(/\/start/, (msg) => {
   );
 });
 
-// Handle /wc command
-bot.onText(/\/wc/, async (msg) => {
-  const chatId = msg.chat.id;
-  const userId = msg.from.id;
-  const username = msg.from.username || msg.from.first_name;
-
-  await handleKeyword(userId, username, "wc", chatId, msg.message_id);
-});
-
-// Handle /cy command
-bot.onText(/\/cy/, async (msg) => {
-  const chatId = msg.chat.id;
-  const userId = msg.from.id;
-  const username = msg.from.username || msg.from.first_name;
-
-  await handleKeyword(userId, username, "cy", chatId, msg.message_id);
-});
-
-// Message handler to monitor '1' and stop timers
+// Handle plain text messages for 'wc' or 'cy'
 bot.on("message", async (msg) => {
   if (!msg.text) return; // Ignore non-text messages
 
   const chatId = msg.chat.id;
   const userId = msg.from.id;
-  const messageText = msg.text.trim();
+  const username = msg.from.username || msg.from.first_name;
+  const messageText = msg.text.trim().toLowerCase(); // Normalize text
+
+  // Handle 'wc' or 'cy' without '/'
+  if (messageText === "wc" || messageText === "cy") {
+    await handleKeyword(userId, username, messageText, chatId, msg.message_id);
+  }
 
   // Stop timers if user sends "1"
   if (messageText.includes("1")) {
